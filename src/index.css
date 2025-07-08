@@ -1,0 +1,263 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Nunito", sans-serif;
+}
+:root {
+  --primary-color: rgb(30, 144, 255);
+  --secondary-color: #6c757d;
+  --background-color: #f8f9fa;
+}
+.feed-container {
+  height: calc(100vh - 64px); 
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
+}
+
+.feed-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.feed-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.feed-container:hover::-webkit-scrollbar-thumb {
+  opacity: 1;
+}
+
+
+
+.auth-logo{
+  width: 50px;
+}
+.logo{
+  width: 8rem;
+}
+.loginpagebtn{
+  text-decoration: none;
+  color: rgb(3, 3, 3);
+  font-weight: 700;
+}
+.loginpagebtn:hover{
+  color:rgb(68, 163, 255) ;
+}
+.label{
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px  0;
+}
+.input{
+  height: 2.2rem;
+  padding: 8px;
+  font-weight: 400;
+  line-height: 16px;
+  font-size: 14px;
+  background: rgb(245, 245, 245);
+  border: 0px;
+  border-radius: 8px;
+}
+
+.input:hover{
+  border: 1px solid black;
+}
+
+.input::placeholder{
+  color: rgb(46, 45, 45);
+}
+.createaccbtn{
+  border-radius: 7px  !important;
+  height: 2.5rem;
+  margin-top: 50px !important;
+  font-weight: 700 !important;
+}
+.createaccbtn:hover{
+  background-color: rgb(68, 163, 255);
+}
+.socialauthbtn{
+  width: 210px;
+  height: 2.8rem;
+  border: 1px solid rgb(232, 232, 232) !important ;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  color: black !important;
+  font-weight: 700 !important;
+}
+.socialauthbtn:hover{
+  border: 1px solid black !important;
+}
+.clientstestimonial{
+  width: 50%;
+  background: url("../public/download.jpeg") center center / cover no-repeat;
+}
+.testimonialcontent{
+  height: 78vh;
+  width: 100%;
+  margin-top: 22vh;
+  align-items: center;
+
+}
+.clientreviewbox{
+  padding: 0 35px 65px;
+  position: relative;
+  height: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 565px;
+  margin: 40px 0px 74px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 24px;
+}
+.reviewpara{
+  text-align: center;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+}
+.reviewsmallbox{
+  position: absolute;
+  bottom: -60px;
+  right: 55px;
+  font-size: 15px;
+  border-radius: 14px;
+  background-color: rgb(255, 139, 3);
+  color: white;
+  padding: 15px 20px 10px;
+}
+.arrow{
+  position: absolute;
+  bottom: 20px;
+}
+.lastmsg{
+  width: 430px;
+  font-size: 1.4rem;
+  margin-top: 50px;
+  font-weight: 600;
+  text-align: center;
+}
+.paswordicon{
+  width: fit-content;
+  position: absolute !important;
+  right: -8px;
+  bottom: -3px;
+  color: black !important;
+
+}
+
+.sidepanel{
+  width: 300px;
+  height: 100vh;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  text-align: center;
+  display: flex !important;
+  align-items: center;
+  flex-direction: column;
+  gap: 15px  !important;
+  padding: 20px;
+  background: #ffffff ;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.5s ease-in-out;
+}
+.sidepanelbtns{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px !important;
+  width: 160px !important;
+  padding: 10px;
+  position: relative;
+  text-align: center;
+  text-transform: capitalize;
+  font-size: 1 rem;
+  font-weight: 600;
+  border-radius: 8px !important;
+  color: #333338 !important;
+  background: #f8f9fa !important;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+
+}
+.sidepanelbtns:hover{
+  background: #e9ecef !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.03);
+}
+
+
+@media screen and (max-width: 1150px) {
+  .clientstestimonial {
+    display: none;
+  }
+  .loginpanel{
+    width: 100% !important;
+  }
+  .signuppanel{
+    width: 100% !important;
+  }
+  
+
+  
+}
+@media screen and (max-width: 750px){
+  
+  .sidepanel{
+    width: 200px;
+  }
+  .sidepanelbtns{
+    width: 140px !important;
+  }
+  .logoutbtn{
+    width: 140px !important;
+  }
+  .sidepanellogo{
+    width: 135px !important;
+  }
+  .loginnavbar{
+    padding: 0 !important;
+    margin-top: 10px !important;
+  }
+  .signupnavbar{
+    padding: 0 !important;
+    margin-top: 10px !important;
+  }
+  .loginform{
+    margin-top: 15px !important;
+  }
+  .signupform{
+    margin-top: 15px !important;
+  }
+  .logo1{
+    display: none;
+  }
+  .logo2{
+    display: block !important;
+  }
+  .logo{
+    width: 30px;
+  }
+}
+@media screen and (max-width: 500px){
+   .loginform{
+    width: 90vw !important;
+   }
+   .signupform{
+    width: 90vw !important;
+   }
+   .socialauthbtnsbox{
+    width: 90vw !important;
+   }
+   .socialauthbtn{
+    width: 100% !important;
+   }
+   .auth-logo{
+    width: 30px;
+  }
+}
