@@ -206,6 +206,7 @@ export type CommentListRead = {
   id: number;
   user: string;
   userId: string;
+  userPic: string;
   content: string;
   created_at: string;
 };
@@ -249,6 +250,7 @@ export type PostListRead = {
   id: number;
   user: string;
   userId: string;
+  userPic: string;
   content: string;
   image?: string | null;
   no_of_likes: number;

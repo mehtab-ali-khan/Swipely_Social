@@ -8,7 +8,24 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  Card,
+  CardContent,
+  IconButton,
+  Chip,
+  Fade,
+  Zoom,
+  useTheme,
+  alpha,
 } from "@mui/material";
+import {
+  Edit as EditIcon,
+  PhotoCamera as PhotoCameraIcon,
+  Image as ImageIcon,
+  Close as CloseIcon,
+  Check as CheckIcon,
+  PersonOutline as PersonIcon,
+  CameraAlt as CameraIcon,
+} from "@mui/icons-material";
 import {
   useMeRetrieveQuery,
   useMeUpdateMutation,
@@ -16,6 +33,7 @@ import {
 import uploadToCloudinary from "../../store/uploadToCloudinary";
 
 const Profile = () => {
+  const theme = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -150,8 +168,29 @@ const Profile = () => {
   // Display loading state
   if (userLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <CircularProgress />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <CircularProgress
+          size={60}
+          sx={{
+            color: theme.palette.primary.main,
+          }}
+        />
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{ fontWeight: 600 }}
+        >
+          Loading your amazing profile... ✨
+        </Typography>
       </Box>
     );
   }
@@ -165,208 +204,633 @@ const Profile = () => {
     <Box
       sx={{
         width: "100%",
-        maxWidth: 800,
+        maxWidth: 900,
         margin: "0 auto",
-        padding: 2,
+        padding: 3,
       }}
     >
-      {/* Cover Image */}
-      <Box
-        sx={{
-          height: 200,
-          backgroundImage: `url(${
-            userData?.cover_pic || "https://via.placeholder.com/800x200"
-          })`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          borderRadius: "8px",
-          marginBottom: 2,
-        }}
-      />
-
-      {/* Profile Image */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: -5,
-        }}
-      >
-        <Avatar
-          src={userData?.profile_pic || "https://via.placeholder.com/150"}
+      <Zoom in timeout={500}>
+        <Card
           sx={{
-            width: 120,
-            height: 120,
-            border: "4px solid white",
+            borderRadius: 6,
+            boxShadow:
+              theme.palette.mode === "dark"
+                ? "0 20px 60px rgba(0,0,0,0.4)"
+                : "0 20px 60px rgba(0,0,0,0.1)",
+            border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            background:
+              theme.palette.mode === "dark"
+                ? `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
+                : `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 1)} 100%)`,
+            backdropFilter: "blur(20px)",
+            overflow: "hidden",
+            position: "relative",
           }}
-        />
-      </Box>
+        >
+          {/* Cover Image Section */}
+          <Box
+            sx={{
+              height: 280,
+              background: userData?.cover_pic
+                ? `url(${userData.cover_pic})`
+                : `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 50%, ${theme.palette.primary.dark} 100%)`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: userData?.cover_pic
+                  ? "linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)"
+                  : "none",
+              },
+            }}
+          >
+            {!userData?.cover_pic && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  color: "white",
+                  zIndex: 1,
+                }}
+              >
+                <CameraIcon sx={{ fontSize: 40, opacity: 0.8 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, opacity: 0.9 }}>
+                  Your Cover Story ✨
+                </Typography>
+              </Box>
+            )}
 
-      {/* Display Name and Bio */}
-      <Box sx={{ textAlign: "center", marginTop: 2 }}>
-        <Typography variant="h5" textTransform="capitalize">
-          {displayName}
-        </Typography>
-        <Typography variant="body1" sx={{ color: "gray", marginTop: 1 }}>
-          {userData?.bio || "This user hasn't added a bio yet."}
-        </Typography>
-      </Box>
+            {/* Edit Button Overlay */}
+            <IconButton
+              onClick={handleModalOpen}
+              sx={{
+                position: "absolute",
+                top: 20,
+                right: 20,
+                backgroundColor: "rgba(255,255,255,0.9)",
+                color: theme.palette.primary.main,
+                backdropFilter: "blur(10px)",
+                zIndex: 2,
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,1)",
+                  transform: "scale(1.1)",
+                  boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+          </Box>
 
-      <Box sx={{ textAlign: "center", marginTop: 3 }}>
-        <Button variant="outlined" color="primary" onClick={handleModalOpen}>
-          Edit Profile
-        </Button>
-      </Box>
+          <CardContent sx={{ px: 4, pb: 4 }}>
+            {/* Profile Avatar Section */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mt: -8,
+                mb: 3,
+              }}
+            >
+              <Box sx={{ position: "relative" }}>
+                <Avatar
+                  src={userData?.profile_pic || ""}
+                  sx={{
+                    width: 140,
+                    height: 140,
+                    border: `6px solid ${theme.palette.background.paper}`,
+                    boxShadow:
+                      theme.palette.mode === "dark"
+                        ? "0 12px 40px rgba(0,0,0,0.4)"
+                        : "0 12px 40px rgba(0,0,0,0.15)",
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    fontSize: "3rem",
+                    fontWeight: "bold",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                >
+                  {displayName?.charAt(0)?.toUpperCase() || "U"}
+                </Avatar>
 
-      {/* Edit Profile Modal */}
+                {/* Online Status Indicator */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 10,
+                    right: 10,
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    backgroundColor: theme.palette.success.main,
+                    border: `3px solid ${theme.palette.background.paper}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "0.7rem" }}>✨</Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* User Info Section */}
+            <Box sx={{ textAlign: "center", mb: 4 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                  mb: 2,
+                }}
+              >
+                <Typography
+                  variant="h3"
+                  sx={{
+                    textTransform: "capitalize",
+                    fontWeight: 800,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {displayName}
+                </Typography>
+                <Chip
+                  label="👑"
+                  size="small"
+                  sx={{
+                    background: `linear-gradient(135deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
+                    color: "white",
+                    fontWeight: "bold",
+                    minWidth: 32,
+                    height: 24,
+                    fontSize: "1rem",
+                  }}
+                />
+              </Box>
+
+              <Box
+                sx={{
+                  maxWidth: 600,
+                  margin: "0 auto",
+                  p: 3,
+                  borderRadius: 4,
+                  background: alpha(theme.palette.primary.main, 0.05),
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                  position: "relative",
+                  "&::before": {
+                    content: '"💬"',
+                    position: "absolute",
+                    top: -10,
+                    left: 20,
+                    fontSize: "1.5rem",
+                    background: theme.palette.background.paper,
+                    padding: "0 8px",
+                  },
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: "text.primary",
+                    fontWeight: 500,
+                    lineHeight: 1.6,
+                    fontStyle: userData?.bio ? "normal" : "italic",
+                  }}
+                >
+                  {userData?.bio ||
+                    "This amazing person hasn't shared their story yet... ✨"}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Action Button */}
+            <Box sx={{ textAlign: "center" }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleModalOpen}
+                startIcon={<EditIcon />}
+                sx={{
+                  fontWeight: "700",
+                  py: 2,
+                  px: 4,
+                  borderRadius: 4,
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  "&:hover": {
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                    transform: "translateY(-3px)",
+                    boxShadow: `0 12px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  },
+                  transition: "all 0.3s ease",
+                }}
+              >
+                Edit Profile ✨
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Zoom>
+
+      {/* Enhanced Edit Profile Modal */}
       <Modal
         open={isModalOpen}
         onClose={handleModalClose}
         aria-labelledby="edit-profile-modal"
+        closeAfterTransition
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "90%", sm: 500 },
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-            maxHeight: "90vh",
-            overflow: "auto",
-          }}
-        >
-          <Typography variant="h6" component="h2" mb={3}>
-            Edit Your Profile
-          </Typography>
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {success}
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            {/* Bio input */}
-            <TextField
-              fullWidth
-              label="Bio"
-              name="bio"
-              multiline
-              rows={4}
-              value={formData.bio}
-              onChange={handleInputChange}
-              margin="normal"
-              placeholder="Tell us about yourself..."
-            />
-
-            {/* Profile Picture Upload */}
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Profile Picture
-              </Typography>
-              <input
-                accept="image/*"
-                type="file"
-                id="profile-pic-upload"
-                name="profilePic"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-              <label htmlFor="profile-pic-upload">
-                <Button variant="contained" component="span">
-                  Choose Profile Picture
-                </Button>
-              </label>
-
-              {/* Preview */}
-              {previewUrls.profilePic && (
-                <Box sx={{ mt: 2, textAlign: "center" }}>
-                  <Avatar
-                    src={previewUrls.profilePic}
-                    sx={{ width: 100, height: 100, margin: "0 auto" }}
-                  />
-                  <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                    Preview
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            {/* Cover Picture Upload */}
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Cover Picture
-              </Typography>
-              <input
-                accept="image/*"
-                type="file"
-                id="cover-pic-upload"
-                name="coverPic"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-              <label htmlFor="cover-pic-upload">
-                <Button variant="contained" component="span">
-                  Choose Cover Picture
-                </Button>
-              </label>
-
-              {/* Preview */}
-              {previewUrls.coverPic && (
-                <Box sx={{ mt: 2 }}>
-                  <Box
-                    sx={{
-                      height: 100,
-                      backgroundImage: `url(${previewUrls.coverPic})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      borderRadius: 1,
-                    }}
-                  />
-                  <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                    Preview
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-
-            {/* Action Buttons */}
+        <Fade in={isModalOpen}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "95%", sm: 600 },
+              maxHeight: "95vh",
+              overflow: "auto",
+              borderRadius: 6,
+              boxShadow:
+                theme.palette.mode === "dark"
+                  ? "0 32px 80px rgba(0,0,0,0.5)"
+                  : "0 32px 80px rgba(0,0,0,0.2)",
+              background:
+                theme.palette.mode === "dark"
+                  ? `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.95)} 0%, ${alpha(theme.palette.background.paper, 1)} 100%)`
+                  : theme.palette.background.paper,
+              backdropFilter: "blur(20px)",
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+            }}
+          >
+            {/* Modal Header */}
             <Box
               sx={{
-                mt: 4,
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 2,
+                p: 4,
+                pb: 2,
+                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
+                borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               }}
             >
-              <Button
-                variant="outlined"
-                onClick={handleModalClose}
-                disabled={loading}
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
               >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} /> : "Save Changes"}
-              </Button>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Avatar
+                    src={userData?.profile_pic}
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      border: `3px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    }}
+                  >
+                    {displayName?.charAt(0)?.toUpperCase() || "U"}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5" fontWeight="800" color="primary">
+                      Edit Your Profile ✨
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      Make it shine like you do! 🌟
+                    </Typography>
+                  </Box>
+                </Box>
+                <IconButton
+                  onClick={handleModalClose}
+                  sx={{
+                    color: "text.secondary",
+                    background: alpha(theme.palette.action.hover, 0.1),
+                    "&:hover": {
+                      background: alpha(theme.palette.error.main, 0.1),
+                      color: "error.main",
+                      transform: "scale(1.1)",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
             </Box>
-          </form>
-        </Box>
+
+            {/* Modal Content */}
+            <Box sx={{ p: 4 }}>
+              {error && (
+                <Zoom in>
+                  <Alert
+                    severity="error"
+                    sx={{
+                      mb: 3,
+                      borderRadius: 3,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {error}
+                  </Alert>
+                </Zoom>
+              )}
+
+              {success && (
+                <Zoom in>
+                  <Alert
+                    severity="success"
+                    sx={{
+                      mb: 3,
+                      borderRadius: 3,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {success}
+                  </Alert>
+                </Zoom>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                {/* Bio Input */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 700,
+                      color: "primary.main",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <PersonIcon /> Tell Your Story
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    label="Your Bio"
+                    name="bio"
+                    multiline
+                    rows={4}
+                    value={formData.bio}
+                    onChange={handleInputChange}
+                    placeholder="Share what makes you amazing... ✨"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                        fontSize: "1.1rem",
+                        lineHeight: 1.6,
+                        background: alpha(theme.palette.primary.main, 0.02),
+                        "&:hover fieldset": {
+                          borderColor: theme.palette.primary.main,
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: theme.palette.primary.main,
+                          borderWidth: "2px",
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+
+                {/* Profile Picture Upload */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 700,
+                      color: "primary.main",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <PhotoCameraIcon /> Profile Picture
+                  </Typography>
+                  <Box
+                    sx={{
+                      p: 3,
+                      borderRadius: 4,
+                      background: alpha(theme.palette.primary.main, 0.05),
+                      border: `2px dashed ${alpha(theme.palette.primary.main, 0.3)}`,
+                      textAlign: "center",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        background: alpha(theme.palette.primary.main, 0.08),
+                        borderColor: theme.palette.primary.main,
+                      },
+                    }}
+                  >
+                    <input
+                      accept="image/*"
+                      type="file"
+                      id="profile-pic-upload"
+                      name="profilePic"
+                      onChange={handleFileChange}
+                      style={{ display: "none" }}
+                    />
+                    <label htmlFor="profile-pic-upload">
+                      <Button
+                        variant="contained"
+                        component="span"
+                        startIcon={<PhotoCameraIcon />}
+                        sx={{
+                          borderRadius: 3,
+                          textTransform: "none",
+                          fontWeight: 600,
+                          py: 1.5,
+                          px: 3,
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
+                          },
+                        }}
+                      >
+                        Choose Your Best Shot 📸
+                      </Button>
+                    </label>
+                  </Box>
+
+                  {previewUrls.profilePic && (
+                    <Zoom in>
+                      <Box sx={{ mt: 3, textAlign: "center" }}>
+                        <Avatar
+                          src={previewUrls.profilePic}
+                          sx={{
+                            width: 120,
+                            height: 120,
+                            margin: "0 auto",
+                            border: `4px solid ${theme.palette.primary.main}`,
+                            boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            mt: 2,
+                            fontWeight: 600,
+                            color: "primary.main",
+                          }}
+                        >
+                          Looking fantastic! ✨
+                        </Typography>
+                      </Box>
+                    </Zoom>
+                  )}
+                </Box>
+
+                {/* Cover Picture Upload */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: 700,
+                      color: "primary.main",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <ImageIcon /> Cover Picture
+                  </Typography>
+                  <Box
+                    sx={{
+                      p: 3,
+                      borderRadius: 4,
+                      background: alpha(theme.palette.secondary.main, 0.05),
+                      border: `2px dashed ${alpha(theme.palette.secondary.main, 0.3)}`,
+                      textAlign: "center",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        background: alpha(theme.palette.secondary.main, 0.08),
+                        borderColor: theme.palette.secondary.main,
+                      },
+                    }}
+                  >
+                    <input
+                      accept="image/*"
+                      type="file"
+                      id="cover-pic-upload"
+                      name="coverPic"
+                      onChange={handleFileChange}
+                      style={{ display: "none" }}
+                    />
+                    <label htmlFor="cover-pic-upload">
+                      <Button
+                        variant="contained"
+                        component="span"
+                        startIcon={<ImageIcon />}
+                        sx={{
+                          borderRadius: 3,
+                          textTransform: "none",
+                          fontWeight: 600,
+                          py: 1.5,
+                          px: 3,
+                          background: `linear-gradient(135deg, ${theme.palette.secondary.main}, ${theme.palette.secondary.dark})`,
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: `0 8px 24px ${alpha(theme.palette.secondary.main, 0.4)}`,
+                          },
+                        }}
+                      >
+                        Choose Your Cover Story 🎨
+                      </Button>
+                    </label>
+                  </Box>
+
+                  {previewUrls.coverPic && (
+                    <Zoom in>
+                      <Box sx={{ mt: 3 }}>
+                        <Box
+                          sx={{
+                            height: 120,
+                            backgroundImage: `url(${previewUrls.coverPic})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            borderRadius: 3,
+                            border: `4px solid ${theme.palette.secondary.main}`,
+                            boxShadow: `0 8px 24px ${alpha(theme.palette.secondary.main, 0.3)}`,
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            mt: 2,
+                            fontWeight: 600,
+                            color: "secondary.main",
+                            textAlign: "center",
+                          }}
+                        >
+                          Perfect cover story! 🌟
+                        </Typography>
+                      </Box>
+                    </Zoom>
+                  )}
+                </Box>
+
+                {/* Action Button */}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  sx={{
+                    fontWeight: "700",
+                    py: 2.5,
+                    borderRadius: 4,
+                    textTransform: "none",
+                    fontSize: "1.2rem",
+                    background: `linear-gradient(135deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+                    "&:hover": {
+                      background: `linear-gradient(135deg, ${theme.palette.success.dark}, ${theme.palette.success.main})`,
+                      transform: "translateY(-2px)",
+                      boxShadow: `0 12px 32px ${alpha(theme.palette.success.main, 0.4)}`,
+                    },
+                    "&:disabled": {
+                      background: alpha(theme.palette.action.disabled, 0.3),
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  {loading ? (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CircularProgress size={24} color="inherit" />
+                      <span>Saving your awesomeness...</span>
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CheckIcon />
+                      <span>Save Changes ✨</span>
+                    </Box>
+                  )}
+                </Button>
+              </form>
+            </Box>
+          </Box>
+        </Fade>
       </Modal>
     </Box>
   );

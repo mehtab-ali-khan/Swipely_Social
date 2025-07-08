@@ -1,71 +1,92 @@
 import { useEffect, useState } from "react";
-import { Box } from "@mui/material";
-
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
-import RightSidebar from "./RightSidebar";
+import { Box, Container, Grid, Paper, useTheme } from "@mui/material";
 import { Outlet } from "react-router-dom";
+import Navbar from "./Navbar";
+import RightSidebar from "./RightSidebar";
+import { SearchProvider } from "../../store/SearchContext";
 
-export default function HomePage() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+const HomePage = () => {
+  const theme = useTheme();
 
   return (
     <Box
       sx={{
+        minHeight: "100vh",
+        bgcolor: theme.palette.mode === "dark" ? "grey.900" : "grey.50",
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
       }}
     >
-      <Navbar handleDrawerToggle={handleDrawerToggle} />
+      <SearchProvider>
+        {/* Fixed Navbar */}
+        <Navbar />
 
-      <Box
-        sx={{
-          display: "flex",
-          flex: 1,
-          mt: 8,
-          overflow: "hidden",
-        }}
-      >
+        {/* Main Content Area */}
         <Box
           sx={{
-            display: { xs: "none", sm: "block" },
-            width: { sm: 240 },
-            flexShrink: 0,
+            flex: 1,
+            pt: 10, // Account for fixed navbar
+            pb: 3,
           }}
         >
-          <Sidebar
-            mobileOpen={mobileOpen}
-            handleDrawerToggle={handleDrawerToggle}
-          />
-        </Box>
+          <Container maxWidth="xl">
+            <Grid container spacing={3}>
+              {/* Main Feed Area */}
+              <Grid item xs={12} md={8} lg={7}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Box sx={{ width: "100%", maxWidth: 600 }}>
+                    <Outlet />
+                  </Box>
+                </Box>
+              </Grid>
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            flexGrow: 1,
-            p: 2,
-          }}
-        >
-          <Outlet />
-        </Box>
+              {/* Right Sidebar - Hidden on mobile */}
+              <Grid
+                item
+                xs={12}
+                md={4}
+                lg={3}
+                sx={{ display: { xs: "none", md: "block" } }}
+              >
+                <Box
+                  sx={{
+                    position: "sticky",
+                    top: 90, // Account for navbar height
+                    height: "calc(100vh - 110px)",
+                    overflowY: "auto",
+                    "&::-webkit-scrollbar": {
+                      width: 6,
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      backgroundColor: "transparent",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.2)"
+                          : "rgba(0,0,0,0.2)",
+                      borderRadius: 3,
+                    },
+                  }}
+                >
+                  <RightSidebar />
+                </Box>
+              </Grid>
 
-        <Box
-          sx={{
-            display: { xs: "none", md: "block" },
-            width: 300,
-            flexShrink: 0,
-            height: "calc(100vh - 64px)",
-          }}
-        >
-          <RightSidebar />
+              {/* Spacer for centering on large screens */}
+              <Grid item lg={2} sx={{ display: { xs: "none", lg: "block" } }} />
+            </Grid>
+          </Container>
         </Box>
-      </Box>
+      </SearchProvider>
     </Box>
   );
-}
+};
+
+export default HomePage;
