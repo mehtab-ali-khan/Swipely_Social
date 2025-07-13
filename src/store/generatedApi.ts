@@ -1,6 +1,22 @@
 import { api } from "./emptyApi.ts";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    activitiesList: build.query<
+      ActivitiesListApiResponse,
+      ActivitiesListApiArg
+    >({
+      query: () => ({ url: `/activities/` }),
+    }),
+    activitiesCreate: build.mutation<
+      ActivitiesCreateApiResponse,
+      ActivitiesCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/activities/`,
+        method: "POST",
+        body: queryArg.activitiesPost,
+      }),
+    }),
     commentsRetrieve: build.query<
       CommentsRetrieveApiResponse,
       CommentsRetrieveApiArg
@@ -54,7 +70,13 @@ const injectedRtkApi = api.injectEndpoints({
       }),
     }),
     postsList: build.query<PostsListApiResponse, PostsListApiArg>({
-      query: () => ({ url: `/posts/` }),
+      query: (queryArg) => ({
+        url: `/posts/`,
+        params: {
+          page: queryArg.page,
+          page_size: queryArg.pageSize,
+        },
+      }),
     }),
     postsCreate: build.mutation<PostsCreateApiResponse, PostsCreateApiArg>({
       query: (queryArg) => ({
@@ -108,7 +130,13 @@ const injectedRtkApi = api.injectEndpoints({
       SearchPostsListApiResponse,
       SearchPostsListApiArg
     >({
-      query: (queryArg) => ({ url: `/search_posts/${queryArg.q}/` }),
+      query: (queryArg) => ({
+        url: `/search_posts/${queryArg.q}/`,
+        params: {
+          page: queryArg.page,
+          page_size: queryArg.pageSize,
+        },
+      }),
     }),
     signupCreate: build.mutation<SignupCreateApiResponse, SignupCreateApiArg>({
       query: (queryArg) => ({
@@ -117,16 +145,31 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.signup,
       }),
     }),
+    usersList: build.query<UsersListApiResponse, UsersListApiArg>({
+      query: () => ({ url: `/users/` }),
+    }),
     usersPostsList: build.query<
       UsersPostsListApiResponse,
       UsersPostsListApiArg
     >({
-      query: (queryArg) => ({ url: `/users/${queryArg.userId}/posts/` }),
+      query: (queryArg) => ({
+        url: `/users/${queryArg.userId}/posts/`,
+        params: {
+          page: queryArg.page,
+          page_size: queryArg.pageSize,
+        },
+      }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as generatedApi };
+export type ActivitiesListApiResponse = /** status 200  */ ActivitiesGetRead[];
+export type ActivitiesListApiArg = void;
+export type ActivitiesCreateApiResponse = /** status 201  */ ActivitiesPost;
+export type ActivitiesCreateApiArg = {
+  activitiesPost: ActivitiesPost;
+};
 export type CommentsRetrieveApiResponse = /** status 200  */ CommentListRead;
 export type CommentsRetrieveApiArg = {
   id: number;
@@ -154,8 +197,13 @@ export type MePartialUpdateApiResponse = /** status 200  */ ProfileUpdate;
 export type MePartialUpdateApiArg = {
   patchedProfileUpdate: PatchedProfileUpdate;
 };
-export type PostsListApiResponse = /** status 200  */ PostListRead[];
-export type PostsListApiArg = void;
+export type PostsListApiResponse = /** status 200  */ PaginatedPostListListRead;
+export type PostsListApiArg = {
+  /** A page number within the paginated result set. */
+  page?: number;
+  /** Number of results to return per page. */
+  pageSize?: number;
+};
 export type PostsCreateApiResponse = /** status 201  */ PostCreateUpdate;
 export type PostsCreateApiArg = {
   postCreateUpdate: PostCreateUpdate;
@@ -187,17 +235,42 @@ export type PostsLikeCreateApiResponse = unknown;
 export type PostsLikeCreateApiArg = {
   postId: number;
 };
-export type SearchPostsListApiResponse = /** status 200  */ PostListRead[];
+export type SearchPostsListApiResponse =
+  /** status 200  */ PaginatedPostListListRead;
 export type SearchPostsListApiArg = {
+  /** A page number within the paginated result set. */
+  page?: number;
+  /** Number of results to return per page. */
+  pageSize?: number;
   q: string;
 };
 export type SignupCreateApiResponse = /** status 201  */ Signup;
 export type SignupCreateApiArg = {
   signup: SignupWrite;
 };
-export type UsersPostsListApiResponse = /** status 200  */ PostListRead[];
+export type UsersListApiResponse = /** status 200  */ MeRead[];
+export type UsersListApiArg = void;
+export type UsersPostsListApiResponse =
+  /** status 200  */ PaginatedPostListListRead;
 export type UsersPostsListApiArg = {
+  /** A page number within the paginated result set. */
+  page?: number;
+  /** Number of results to return per page. */
+  pageSize?: number;
   userId: number;
+};
+export type ActivitiesGet = {
+  content: string;
+};
+export type ActivitiesGetRead = {
+  id: number;
+  user: string;
+  userPic: string;
+  content: string;
+  created_at: string;
+};
+export type ActivitiesPost = {
+  content: string;
 };
 export type CommentList = {
   content: string;
@@ -220,6 +293,7 @@ export type Login = {
 export type Me = {
   first_name?: string;
   last_name?: string;
+  email: string;
   bio?: string | null;
   profile_pic?: string | null;
   cover_pic?: string | null;
@@ -228,6 +302,7 @@ export type MeRead = {
   id: number;
   first_name?: string;
   last_name?: string;
+  email: string;
   bio?: string | null;
   profile_pic?: string | null;
   cover_pic?: string | null;
@@ -254,7 +329,20 @@ export type PostListRead = {
   content: string;
   image?: string | null;
   no_of_likes: number;
+  has_liked: boolean;
   created_at: string;
+};
+export type PaginatedPostListList = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: PostList[];
+};
+export type PaginatedPostListListRead = {
+  count: number;
+  next?: string | null;
+  previous?: string | null;
+  results: PostListRead[];
 };
 export type PostCreateUpdate = {
   content: string;
@@ -272,6 +360,8 @@ export type SignupWrite = {
   password: string;
 };
 export const {
+  useActivitiesListQuery,
+  useActivitiesCreateMutation,
   useCommentsRetrieveQuery,
   useCommentsUpdateMutation,
   useCommentsDestroyMutation,
@@ -289,5 +379,6 @@ export const {
   usePostsLikeCreateMutation,
   useSearchPostsListQuery,
   useSignupCreateMutation,
+  useUsersListQuery,
   useUsersPostsListQuery,
 } = injectedRtkApi;

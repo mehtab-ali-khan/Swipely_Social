@@ -36,7 +36,8 @@ import {
   usePostsCommentsCreateMutation,
   useCommentsUpdateMutation,
   useCommentsDestroyMutation,
-} from "../../store/generatedApi";
+  useActivitiesCreateMutation,
+} from "../../store/api";
 
 // Helper function to capitalize first letter
 const capitalizeFirstLetter = (str) => {
@@ -622,7 +623,7 @@ const CommentsList = ({
 };
 
 // Main Comments Component
-const Comments = ({ postId, user, isExpanded, onRefetch }) => {
+const Comments = ({ postId, user, isExpanded }) => {
   const theme = useTheme();
   const [commentText, setCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -640,6 +641,7 @@ const Comments = ({ postId, user, isExpanded, onRefetch }) => {
   const [createComment] = usePostsCommentsCreateMutation();
   const [updateComment] = useCommentsUpdateMutation();
   const [deleteComment] = useCommentsDestroyMutation();
+  const [activity] = useActivitiesCreateMutation();
 
   useEffect(() => {
     if (isExpanded) {
@@ -665,10 +667,12 @@ const Comments = ({ postId, user, isExpanded, onRefetch }) => {
           },
         }).unwrap();
 
+        const actiivtycontent = "Commented on a Post";
+        activity({ activitiesPost: { content: actiivtycontent } }).unwrap();
+
         setCommentText("");
         toast.success("Comment added successfully! 💬✨");
-        refetchComments();
-        if (onRefetch) onRefetch();
+        // if (onRefetch) onRefetch();
       } catch (err) {
         console.error("Error creating comment:", err);
         toast.error("Failed to add comment 😞");
@@ -676,7 +680,7 @@ const Comments = ({ postId, user, isExpanded, onRefetch }) => {
         setIsSubmitting(false);
       }
     },
-    [commentText, createComment, refetchComments, onRefetch]
+    [commentText, createComment]
   );
 
   const handleEditComment = useCallback((commentId, content) => {
@@ -701,8 +705,8 @@ const Comments = ({ postId, user, isExpanded, onRefetch }) => {
         setEditingComment(null);
         setEditText("");
         toast.success("Comment updated successfully! ✏️✨");
-        refetchComments();
-        if (onRefetch) onRefetch();
+        // refetchComments();
+        // if (onRefetch) onRefetch();
       } catch (err) {
         console.error("Error updating comment:", err);
         toast.error("Failed to update comment 😞");
@@ -710,7 +714,7 @@ const Comments = ({ postId, user, isExpanded, onRefetch }) => {
         setIsUpdating(false);
       }
     },
-    [editText, updateComment, refetchComments, onRefetch]
+    [editText]
   );
 
   const handleDeleteComment = useCallback(
@@ -722,14 +726,14 @@ const Comments = ({ postId, user, isExpanded, onRefetch }) => {
       try {
         await deleteComment({ id: commentId }).unwrap();
         toast.success("Comment deleted successfully! 🗑️✨");
-        refetchComments();
-        if (onRefetch) onRefetch();
+        // refetchComments();
+        // if (onRefetch) onRefetch();
       } catch (err) {
         console.error("Error deleting comment:", err);
         toast.error("Failed to delete comment 😞");
       }
     },
-    [deleteComment, refetchComments, onRefetch]
+    [deleteComment]
   );
 
   const handleCancelEdit = useCallback(() => {

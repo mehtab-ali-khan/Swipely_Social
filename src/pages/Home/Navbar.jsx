@@ -30,14 +30,11 @@ import {
 } from "@mui/icons-material";
 import { useThemeMode } from "../../store/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import {
-  generatedApi,
-  useMeRetrieveQuery,
-  useSearchPostsListQuery,
-} from "../../store/generatedApi";
+import { generatedApi } from "../../store/generatedApi";
 import { useDispatch } from "react-redux";
 import { useSearch } from "../../store/SearchContext";
 import { toast } from "react-toastify";
+import { useMeRetrieveQuery, useSearchPostsListQuery } from "../../store/api";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -65,7 +62,6 @@ function Navbar() {
     data: searchData,
     isLoading: searchLoading,
     error: searchError,
-    refetch: refetchSearch,
   } = useSearchPostsListQuery(
     { q: searchQuery },
     {

@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { Navigate, RouterProvider } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "@emotion/react";
 import { useThemeMode } from "./store/ThemeContext";

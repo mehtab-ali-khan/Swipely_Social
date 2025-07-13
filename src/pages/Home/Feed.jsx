@@ -23,6 +23,7 @@ import {
   alpha,
   Alert,
 } from "@mui/material";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import {
   Close,
   Add as AddIcon,
@@ -33,14 +34,15 @@ import {
   Search as SearchIcon,
   Clear as ClearIcon,
 } from "@mui/icons-material";
-import {
-  useMeRetrieveQuery,
-  usePostsCreateMutation,
-  usePostsListQuery,
-} from "../../store/generatedApi";
 import uploadToCloudinary from "../../store/uploadToCloudinary";
 import Posts from "./Posts";
 import { useSearch } from "../../store/SearchContext";
+import {
+  useActivitiesCreateMutation,
+  useMeRetrieveQuery,
+  usePostsCreateMutation,
+  usePostsListQuery,
+} from "../../store/api";
 
 function Feed() {
   const theme = useTheme();
@@ -48,17 +50,23 @@ function Feed() {
   const [content, setContent] = useState("");
   const [file, setFile] = useState(null);
   const [postloading, setPostLoading] = useState(false);
-  const { data: allPosts, refetch } = usePostsListQuery();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsToShow, setPostsToShow] = useState([]);
+  const { data: allPosts } = usePostsListQuery({
+    page: currentPage,
+    pageSize: 10,
+  });
   const { data: user } = useMeRetrieveQuery();
+  const [activity] = useActivitiesCreateMutation();
   const [post] = usePostsCreateMutation();
 
   const { searchQuery, searchResults, isSearching, clearSearch } = useSearch();
 
-  const postsToShow = React.useMemo(() => {
+  React.useMemo(() => {
     if (searchQuery && searchQuery.trim().length >= 2) {
-      return searchResults || [];
+      return setPostsToShow(searchResults?.results || []);
     }
-    return allPosts || [];
+    return setPostsToShow(allPosts?.results || []);
   }, [searchQuery, searchResults, allPosts]);
 
   const showingSearchResults = searchQuery && searchQuery.trim().length >= 2;
@@ -91,11 +99,13 @@ function Feed() {
         },
       }).unwrap();
 
+      const actiivtycontent = "Created a new Post";
+      activity({ activitiesPost: { content: actiivtycontent } }).unwrap();
+
       toast.success("Post created!");
       setPostLoading(false);
       setOpenCreatePost(false);
       resetForm();
-      refetch();
     } catch (err) {
       console.error("Error creating post:", err);
       toast.error("Error creating post!");
@@ -173,7 +183,6 @@ function Feed() {
           </Card>
         </Fade>
       )}
-
       {/* Loading State for Search */}
       {isSearching && (
         <Box
@@ -191,44 +200,44 @@ function Feed() {
           </Typography>
         </Box>
       )}
-
       {/* No Search Results */}
-      {showingSearchResults && !isSearching && postsToShow?.length === 0 && (
-        <Fade in timeout={300}>
-          <Card
-            sx={{
-              mb: 3,
-              borderRadius: 3,
-              textAlign: "center",
-              py: 4,
-            }}
-          >
-            <CardContent>
-              <SearchIcon
-                sx={{
-                  fontSize: 48,
-                  color: "text.secondary",
-                  mb: 2,
-                }}
-              />
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No posts found
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Try adjusting your search terms or{" "}
-                <Button
-                  variant="text"
-                  onClick={clearSearch}
-                  sx={{ textTransform: "none", p: 0, minWidth: "auto" }}
-                >
-                  browse all posts
-                </Button>
-              </Typography>
-            </CardContent>
-          </Card>
-        </Fade>
-      )}
-
+      {showingSearchResults &&
+        !isSearching &&
+        postsToShow?.results?.length === 0 && (
+          <Fade in timeout={300}>
+            <Card
+              sx={{
+                mb: 3,
+                borderRadius: 3,
+                textAlign: "center",
+                py: 4,
+              }}
+            >
+              <CardContent>
+                <SearchIcon
+                  sx={{
+                    fontSize: 48,
+                    color: "text.secondary",
+                    mb: 2,
+                  }}
+                />
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No posts found
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Try adjusting your search terms or{" "}
+                  <Button
+                    variant="text"
+                    onClick={clearSearch}
+                    sx={{ textTransform: "none", p: 0, minWidth: "auto" }}
+                  >
+                    browse all posts
+                  </Button>
+                </Typography>
+              </CardContent>
+            </Card>
+          </Fade>
+        )}
       {/* Create Post Card - Only show when not searching */}
       {!showingSearchResults && (
         <Zoom in timeout={300}>
@@ -367,10 +376,9 @@ function Feed() {
         </Zoom>
       )}
 
-      {/* Posts List */}
-      <Posts posts={postsToShow} user={user} refetch={refetch} />
-
+      <Posts posts={postsToShow} user={user} />
       {/* Enhanced Create Post Dialog */}
+
       <Dialog
         open={openCreatePost}
         onClose={handleCloseCreatePost}

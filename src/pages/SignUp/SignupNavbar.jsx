@@ -30,7 +30,7 @@ function SignupNavbar() {
           Swipely
         </Typography>
       </Box>
-      <Box sx={{ fontSize: "13px" }}>
+      <Box sx={{ fontSize: { xs: "12px", sm: "14px" } }}>
         <Typography color="black" variant="p">
           Already have an account?{" "}
         </Typography>

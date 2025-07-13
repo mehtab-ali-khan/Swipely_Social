@@ -50,7 +50,8 @@ import {
   usePostsLikeCreateMutation,
   usePostsUpdateMutation,
   usePostsDestroyMutation,
-} from "../../store/generatedApi";
+  useActivitiesCreateMutation,
+} from "../../store/api";
 import uploadToCloudinary from "../../store/uploadToCloudinary";
 import Comments from "./Comments";
 
@@ -481,20 +482,25 @@ const EditPostDialog = ({
   );
 };
 
-function Posts({ posts, user, refetch }) {
+function Posts({ posts, user }) {
   const theme = useTheme();
   const [like] = usePostsLikeCreateMutation();
   const [updatePost] = usePostsUpdateMutation();
   const [deletePost] = usePostsDestroyMutation();
+  const [activity] = useActivitiesCreateMutation();
   const [expandedComments, setExpandedComments] = useState({});
   const [editingPost, setEditingPost] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleLike = async (postId) => {
+  const handleLike = async (postId, post) => {
     try {
       await like({ postId }).unwrap();
-      toast.success("Toggled like! 💖");
-      refetch();
+      const actiivtycontent =
+        post.has_liked == false ? "Liked on a Post" : "Unliked the Post";
+      activity({ activitiesPost: { content: actiivtycontent } }).unwrap();
+      toast.success(
+        post.has_liked == false ? "Liked on a Post" : "Unlike the Post! 💖"
+      );
     } catch (err) {
       console.error(err);
       toast.error("Failed to toggle like");
@@ -526,7 +532,6 @@ function Posts({ posts, user, refetch }) {
         }).unwrap();
 
         toast.success("Post updated successfully! ✨");
-        refetch();
         setEditingPost(null);
       } catch (err) {
         console.error(err);
@@ -535,7 +540,7 @@ function Posts({ posts, user, refetch }) {
         setIsUpdating(false);
       }
     },
-    [updatePost, refetch]
+    [updatePost]
   );
 
   const handleDeletePost = useCallback(
@@ -544,14 +549,13 @@ function Posts({ posts, user, refetch }) {
         try {
           await deletePost({ id: postId }).unwrap();
           toast.success("Post deleted successfully! 🗑️");
-          refetch();
         } catch (err) {
           console.error(err);
           toast.error("Failed to delete post");
         }
       }
     },
-    [deletePost, refetch]
+    [deletePost]
   );
 
   const handleCloseEditDialog = () => {
@@ -561,7 +565,7 @@ function Posts({ posts, user, refetch }) {
   return (
     <Box sx={{ width: "100%" }}>
       {posts ? (
-        posts.map((post, index) => (
+        posts?.map((post, index) => (
           <Zoom in timeout={300 + index * 100} key={post.id}>
             <Card
               sx={{
@@ -716,14 +720,14 @@ function Posts({ posts, user, refetch }) {
                 >
                   <Box sx={{ display: "flex", gap: 1 }}>
                     <Button
-                      onClick={() => handleLike(post.id)}
+                      onClick={() => handleLike(post.id, post)}
                       startIcon={<ThumbUp />}
                       sx={{
                         color: "text.secondary",
                         textTransform: "none",
                         fontWeight: "600",
                         borderRadius: 3,
-                        px: 2,
+                        px: 1.5,
                         py: 1,
                         background: alpha(theme.palette.primary.main, 0.05),
                         "&:hover": {
@@ -752,7 +756,7 @@ function Posts({ posts, user, refetch }) {
                         textTransform: "none",
                         fontWeight: "600",
                         borderRadius: 3,
-                        px: 2,
+                        px: 1.5,
                         py: 1,
                         background: alpha(theme.palette.secondary.main, 0.05),
                         "&:hover": {
@@ -785,7 +789,6 @@ function Posts({ posts, user, refetch }) {
                     postId={post.id}
                     user={user}
                     isExpanded={expandedComments[post.id]}
-                    onRefetch={refetch}
                   />
                 </Box>
               </Collapse>

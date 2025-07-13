@@ -26,10 +26,7 @@ import {
   PersonOutline as PersonIcon,
   CameraAlt as CameraIcon,
 } from "@mui/icons-material";
-import {
-  useMeRetrieveQuery,
-  useMeUpdateMutation,
-} from "../../store/generatedApi";
+import { useMeRetrieveQuery, useMeUpdateMutation } from "../../store/api";
 import uploadToCloudinary from "../../store/uploadToCloudinary";
 
 const Profile = () => {
