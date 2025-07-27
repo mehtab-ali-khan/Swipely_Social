@@ -36,7 +36,6 @@ import {
   usePostsCommentsCreateMutation,
   useCommentsUpdateMutation,
   useCommentsDestroyMutation,
-  useActivitiesCreateMutation,
 } from "../../store/api";
 
 // Helper function to capitalize first letter
@@ -50,7 +49,7 @@ const CommentMenu = ({ comment, user, onEditComment, onDeleteComment }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const isOwner = user?.id === comment.userId;
+  const isOwner = user?.id === comment.user.user_id;
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -298,7 +297,7 @@ const CommentItem = ({
   index,
 }) => {
   const theme = useTheme();
-  const isOwner = user?.id === comment.userId;
+  const isOwner = user?.id === comment.user.user_id;
   const isEditing = editingComment === comment.id;
 
   const handleUpdateKeyPress = (e) => {
@@ -343,7 +342,7 @@ const CommentItem = ({
       >
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
           <Avatar
-            src={comment.userPic}
+            src={comment.user.profile_pic}
             sx={{
               width: 36,
               height: 36,
@@ -357,7 +356,7 @@ const CommentItem = ({
               },
             }}
           >
-            {capitalizeFirstLetter(comment.user)?.charAt(0) || "U"}
+            {capitalizeFirstLetter(comment.user.name)?.charAt(0) || "U"}
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box
@@ -377,7 +376,7 @@ const CommentItem = ({
                     textTransform: "capitalize",
                   }}
                 >
-                  {capitalizeFirstLetter(comment.user) || "Unknown User"}
+                  {capitalizeFirstLetter(comment.user.name) || "Unknown User"}
                 </Typography>
                 <Chip
                   label="💬"
@@ -578,7 +577,7 @@ const CommentsList = ({
 
   return (
     <Box sx={{ px: 3, pb: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, m: 3 }}>
         <Typography
           variant="h6"
           sx={{
@@ -641,7 +640,6 @@ const Comments = ({ postId, user, isExpanded }) => {
   const [createComment] = usePostsCommentsCreateMutation();
   const [updateComment] = useCommentsUpdateMutation();
   const [deleteComment] = useCommentsDestroyMutation();
-  const [activity] = useActivitiesCreateMutation();
 
   useEffect(() => {
     if (isExpanded) {
@@ -666,9 +664,6 @@ const Comments = ({ postId, user, isExpanded }) => {
             content,
           },
         }).unwrap();
-
-        const actiivtycontent = "Commented on a Post";
-        activity({ activitiesPost: { content: actiivtycontent } }).unwrap();
 
         setCommentText("");
         toast.success("Comment added successfully! 💬✨");

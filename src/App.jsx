@@ -13,6 +13,11 @@ import Login from "./pages/LogIn/Login";
 import "./index.css";
 import Feed from "./pages/Home/Feed";
 import Profile from "./pages/Home/Profile";
+import PollList from "./pages/Home/PollList";
+import Chat from "./pages/Home/Chat";
+import MobileFriendsManagement from "./pages/Home/MobileFriendsManagement";
+import MobileActivities from "./pages/Home/MobileActivities";
+import { MobileOnlyGuard } from "./MobileOnlyGaurd";
 
 const HomeProtectedRoute = ({ children }) => {
   const user = localStorage.getItem("authToken");
@@ -54,7 +59,25 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "", element: <Feed /> },
+      { path: "poll", element: <PollList /> },
       { path: "profile", element: <Profile /> },
+      {
+        path: "friends",
+        element: (
+          <MobileOnlyGuard>
+            <MobileFriendsManagement />
+          </MobileOnlyGuard>
+        ),
+      },
+      {
+        path: "activities",
+        element: (
+          <MobileOnlyGuard>
+            <MobileActivities />
+          </MobileOnlyGuard>
+        ),
+      },
+      { path: "chat/:userId", element: <Chat /> },
     ],
   },
 ]);

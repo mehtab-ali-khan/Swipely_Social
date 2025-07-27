@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import {
@@ -39,6 +39,7 @@ import {
   Delete as DeleteIcon,
   Cancel as CancelIcon,
   Check as CheckIcon,
+  Link as LinkIcon,
   Close,
   Add as AddIcon,
   Image as ImageIcon,
@@ -50,10 +51,10 @@ import {
   usePostsLikeCreateMutation,
   usePostsUpdateMutation,
   usePostsDestroyMutation,
-  useActivitiesCreateMutation,
 } from "../../store/api";
 import uploadToCloudinary from "../../store/uploadToCloudinary";
 import Comments from "./Comments";
+import { useLocation } from "react-router-dom";
 
 // Helper function to capitalize first letter
 const capitalizeFirstLetter = (str) => {
@@ -66,7 +67,7 @@ const PostMenu = ({ post, user, onEditPost, onDeletePost }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const isOwner = user?.id === post.userId;
+  const isOwner = user?.id === post.user.id;
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -487,7 +488,6 @@ function Posts({ posts, user }) {
   const [like] = usePostsLikeCreateMutation();
   const [updatePost] = usePostsUpdateMutation();
   const [deletePost] = usePostsDestroyMutation();
-  const [activity] = useActivitiesCreateMutation();
   const [expandedComments, setExpandedComments] = useState({});
   const [editingPost, setEditingPost] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -495,9 +495,6 @@ function Posts({ posts, user }) {
   const handleLike = async (postId, post) => {
     try {
       await like({ postId }).unwrap();
-      const actiivtycontent =
-        post.has_liked == false ? "Liked on a Post" : "Unliked the Post";
-      activity({ activitiesPost: { content: actiivtycontent } }).unwrap();
       toast.success(
         post.has_liked == false ? "Liked on a Post" : "Unlike the Post! 💖"
       );
@@ -506,6 +503,58 @@ function Posts({ posts, user }) {
       toast.error("Failed to toggle like");
     }
   };
+  const handleSharePost = useCallback((postId) => {
+    const currentUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${currentUrl}#post-${postId}`;
+
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        toast.success("Post link copied to clipboard! 🔗");
+      })
+      .catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        toast.success("Post link copied to clipboard! 🔗");
+      });
+  }, []);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const hash = location.hash;
+
+    if (hash.startsWith("#post-")) {
+      const postId = hash.replace("#post-", "");
+      const element = document.getElementById(`post-${postId}`);
+
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      } else {
+        const timer = setInterval(() => {
+          const el = document.getElementById(`post-${postId}`);
+          if (el) {
+            el.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+            clearInterval(timer);
+          }
+        }, 100);
+        return () => clearInterval(timer);
+      }
+    }
+  }, [location.hash]); // React to hash changes
 
   const toggleComments = (postId) => {
     setExpandedComments((prev) => ({
@@ -568,6 +617,7 @@ function Posts({ posts, user }) {
         posts?.map((post, index) => (
           <Zoom in timeout={300 + index * 100} key={post.id}>
             <Card
+              id={`post-${post.id}`}
               sx={{
                 mb: 4,
                 borderRadius: 4,
@@ -594,8 +644,8 @@ function Posts({ posts, user }) {
               <CardHeader
                 avatar={
                   <Avatar
-                    src={post.userPic}
-                    alt={post.user || "User"}
+                    src={post.user.profile_pic}
+                    alt={post.user.name || "User"}
                     sx={{
                       width: 48,
                       height: 48,
@@ -609,7 +659,7 @@ function Posts({ posts, user }) {
                       },
                     }}
                   >
-                    {capitalizeFirstLetter(post.user)?.charAt(0) || "U"}
+                    {capitalizeFirstLetter(post.user.name)?.charAt(0) || "U"}
                   </Avatar>
                 }
                 action={
@@ -630,7 +680,7 @@ function Posts({ posts, user }) {
                         color: "text.primary",
                       }}
                     >
-                      {capitalizeFirstLetter(post.user) || "User"}
+                      {capitalizeFirstLetter(post.user.name) || "User"}
                     </Typography>
                     <Chip
                       label="✨"
@@ -739,7 +789,7 @@ function Posts({ posts, user }) {
                         transition: "all 0.3s ease",
                       }}
                     >
-                      {post.no_of_likes || 0} 💖
+                      {post.no_of_likes || 0}
                     </Button>
                     <Button
                       startIcon={<Comment />}
@@ -768,7 +818,29 @@ function Posts({ posts, user }) {
                         transition: "all 0.3s ease",
                       }}
                     >
-                      Comments 💬
+                      {post.no_of_comments || 0}
+                    </Button>
+                    <Button
+                      onClick={() => handleSharePost(post.id)}
+                      startIcon={<LinkIcon />}
+                      sx={{
+                        color: "text.secondary",
+                        textTransform: "none",
+                        fontWeight: "600",
+                        borderRadius: 3,
+                        px: 1.5,
+                        py: 1,
+                        background: alpha(theme.palette.info.main, 0.05),
+                        "&:hover": {
+                          color: "info.main",
+                          background: alpha(theme.palette.info.main, 0.1),
+                          transform: "translateY(-2px)",
+                          boxShadow: `0 4px 16px ${alpha(theme.palette.info.main, 0.2)}`,
+                        },
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      Share
                     </Button>
                   </Box>
                 </Box>

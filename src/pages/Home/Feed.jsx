@@ -1,4 +1,4 @@
-// Updated Feed.js - Fixed search results display
+// Updated Feed.js - Added Poll Feature
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import {
@@ -22,8 +22,8 @@ import {
   useTheme,
   alpha,
   Alert,
+  Chip,
 } from "@mui/material";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import {
   Close,
   Add as AddIcon,
@@ -33,31 +33,35 @@ import {
   Poll as PollIcon,
   Search as SearchIcon,
   Clear as ClearIcon,
+  Delete as DeleteIcon,
+  AddCircle as AddCircleIcon,
 } from "@mui/icons-material";
 import uploadToCloudinary from "../../store/uploadToCloudinary";
 import Posts from "./Posts";
 import { useSearch } from "../../store/SearchContext";
 import {
-  useActivitiesCreateMutation,
   useMeRetrieveQuery,
   usePostsCreateMutation,
   usePostsListQuery,
 } from "../../store/api";
+import CreatePoll from "./PollCreate";
+import { useLocation } from "react-router-dom";
 
 function Feed() {
   const theme = useTheme();
   const [openCreatePost, setOpenCreatePost] = useState(false);
+  const [openCreatePoll, setOpenCreatePoll] = useState(false); // New state for poll dialog
   const [content, setContent] = useState("");
   const [file, setFile] = useState(null);
   const [postloading, setPostLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [postsToShow, setPostsToShow] = useState([]);
+
   const { data: allPosts } = usePostsListQuery({
     page: currentPage,
     pageSize: 10,
   });
   const { data: user } = useMeRetrieveQuery();
-  const [activity] = useActivitiesCreateMutation();
   const [post] = usePostsCreateMutation();
 
   const { searchQuery, searchResults, isSearching, clearSearch } = useSearch();
@@ -70,6 +74,38 @@ function Feed() {
   }, [searchQuery, searchResults, allPosts]);
 
   const showingSearchResults = searchQuery && searchQuery.trim().length >= 2;
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const hash = location.hash;
+
+    if (hash.startsWith("#post-")) {
+      const postId = hash.replace("#post-", "");
+      const element = document.getElementById(`post-${postId}`);
+
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      } else {
+        const timer = setInterval(() => {
+          const el = document.getElementById(`post-${postId}`);
+          if (el) {
+            el.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+            clearInterval(timer);
+          }
+        }, 100);
+        return () => clearInterval(timer);
+      }
+    }
+  }, [location.hash]); // React to hash changes
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
@@ -92,15 +128,14 @@ function Feed() {
         console.log("Uploaded image URL:", imageUrl);
       }
 
-      await post({
-        postCreateUpdate: {
-          content,
-          image: imageUrl,
-        },
-      }).unwrap();
+      const postData = {
+        content,
+        image: imageUrl,
+      };
 
-      const actiivtycontent = "Created a new Post";
-      activity({ activitiesPost: { content: actiivtycontent } }).unwrap();
+      await post({
+        postCreateUpdate: postData,
+      }).unwrap();
 
       toast.success("Post created!");
       setPostLoading(false);
@@ -127,6 +162,15 @@ function Feed() {
     resetForm();
   };
 
+  // New handlers for poll dialog
+  const handleClickOpenCreatePoll = () => {
+    setOpenCreatePoll(true);
+  };
+
+  const handleCloseCreatePoll = () => {
+    setOpenCreatePoll(false);
+  };
+
   return (
     <Box
       className="feed-container"
@@ -134,7 +178,6 @@ function Feed() {
         width: "100%",
         maxWidth: 680,
         mx: "auto",
-        px: { xs: 2, sm: 0 },
       }}
     >
       {/* Search Results Header */}
@@ -354,7 +397,7 @@ function Feed() {
                 </Button>
                 <Button
                   startIcon={<PollIcon />}
-                  onClick={handleClickOpenCreatePost}
+                  onClick={handleClickOpenCreatePoll} // Changed to open poll dialog
                   sx={{
                     flex: 1,
                     py: 1.5,
@@ -494,6 +537,8 @@ function Feed() {
             }}
           />
 
+          {/* Poll Section */}
+
           {/* Enhanced File Preview */}
           {file && (
             <Box
@@ -560,7 +605,7 @@ function Feed() {
               Add to your post
             </Typography>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <input
                 accept="image/*"
                 id="file-input"
@@ -635,6 +680,8 @@ function Feed() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <CreatePoll open={openCreatePoll} onClose={handleCloseCreatePoll} />
     </Box>
   );
 }

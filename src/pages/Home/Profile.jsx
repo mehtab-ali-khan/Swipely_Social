@@ -203,7 +203,7 @@ const Profile = () => {
         width: "100%",
         maxWidth: 900,
         margin: "0 auto",
-        padding: 3,
+        padding: { xs: 0, md: 2 },
       }}
     >
       <Zoom in timeout={500}>
@@ -480,7 +480,7 @@ const Profile = () => {
             {/* Modal Header */}
             <Box
               sx={{
-                p: 4,
+                p: { xs: 2.5, sm: 3, md: 4 },
                 pb: 2,
                 background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
                 borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
@@ -535,7 +535,11 @@ const Profile = () => {
             </Box>
 
             {/* Modal Content */}
-            <Box sx={{ p: 4 }}>
+            <Box
+              sx={{
+                p: { xs: 2.5, sm: 3, md: 4 },
+              }}
+            >
               {error && (
                 <Zoom in>
                   <Alert

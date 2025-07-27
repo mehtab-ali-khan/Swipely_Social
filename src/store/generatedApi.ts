@@ -7,16 +7,6 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/activities/` }),
     }),
-    activitiesCreate: build.mutation<
-      ActivitiesCreateApiResponse,
-      ActivitiesCreateApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/activities/`,
-        method: "POST",
-        body: queryArg.activitiesPost,
-      }),
-    }),
     commentsRetrieve: build.query<
       CommentsRetrieveApiResponse,
       CommentsRetrieveApiArg
@@ -41,6 +31,39 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/comments/${queryArg.id}/`,
         method: "DELETE",
       }),
+    }),
+    friendSendRequestCreate: build.mutation<
+      FriendSendRequestCreateApiResponse,
+      FriendSendRequestCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/friend/${queryArg.userId}/send_request/`,
+        method: "POST",
+      }),
+    }),
+    friendRequestCreate: build.mutation<
+      FriendRequestCreateApiResponse,
+      FriendRequestCreateApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/friend_request/${queryArg.userId}/${queryArg.q}/`,
+        method: "POST",
+      }),
+    }),
+    friendRequestsList: build.query<
+      FriendRequestsListApiResponse,
+      FriendRequestsListApiArg
+    >({
+      query: () => ({ url: `/friend_requests/` }),
+    }),
+    friendsList: build.query<FriendsListApiResponse, FriendsListApiArg>({
+      query: () => ({ url: `/friends/` }),
+    }),
+    friendsChatList: build.query<
+      FriendsChatListApiResponse,
+      FriendsChatListApiArg
+    >({
+      query: (queryArg) => ({ url: `/friends_chat/${queryArg.friendId}/` }),
     }),
     loginCreate: build.mutation<LoginCreateApiResponse, LoginCreateApiArg>({
       query: (queryArg) => ({
@@ -67,6 +90,16 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/me/`,
         method: "PATCH",
         body: queryArg.patchedProfileUpdate,
+      }),
+    }),
+    pollList: build.query<PollListApiResponse, PollListApiArg>({
+      query: () => ({ url: `/poll/` }),
+    }),
+    pollCreate: build.mutation<PollCreateApiResponse, PollCreateApiArg>({
+      query: (queryArg) => ({
+        url: `/poll/`,
+        method: "POST",
+        body: queryArg.pollListCreate,
       }),
     }),
     postsList: build.query<PostsListApiResponse, PostsListApiArg>({
@@ -145,8 +178,11 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.signup,
       }),
     }),
-    usersList: build.query<UsersListApiResponse, UsersListApiArg>({
-      query: () => ({ url: `/users/` }),
+    suggestedFriendsList: build.query<
+      SuggestedFriendsListApiResponse,
+      SuggestedFriendsListApiArg
+    >({
+      query: () => ({ url: `/suggested_friends/` }),
     }),
     usersPostsList: build.query<
       UsersPostsListApiResponse,
@@ -160,16 +196,18 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    voteCreate: build.mutation<VoteCreateApiResponse, VoteCreateApiArg>({
+      query: (queryArg) => ({
+        url: `/vote/${queryArg.optionId}/`,
+        method: "POST",
+      }),
+    }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as generatedApi };
 export type ActivitiesListApiResponse = /** status 200  */ ActivitiesGetRead[];
 export type ActivitiesListApiArg = void;
-export type ActivitiesCreateApiResponse = /** status 201  */ ActivitiesPost;
-export type ActivitiesCreateApiArg = {
-  activitiesPost: ActivitiesPost;
-};
 export type CommentsRetrieveApiResponse = /** status 200  */ CommentListRead;
 export type CommentsRetrieveApiArg = {
   id: number;
@@ -182,6 +220,24 @@ export type CommentsUpdateApiArg = {
 export type CommentsDestroyApiResponse = unknown;
 export type CommentsDestroyApiArg = {
   id: number;
+};
+export type FriendSendRequestCreateApiResponse = unknown;
+export type FriendSendRequestCreateApiArg = {
+  userId: number;
+};
+export type FriendRequestCreateApiResponse = unknown;
+export type FriendRequestCreateApiArg = {
+  q: string;
+  userId: number;
+};
+export type FriendRequestsListApiResponse =
+  /** status 200  */ RequestsGetRead[];
+export type FriendRequestsListApiArg = void;
+export type FriendsListApiResponse = /** status 200  */ FriendRead[];
+export type FriendsListApiArg = void;
+export type FriendsChatListApiResponse = /** status 200  */ FriendsChatRead[];
+export type FriendsChatListApiArg = {
+  friendId: number;
 };
 export type LoginCreateApiResponse = /** status 200  */ Login;
 export type LoginCreateApiArg = {
@@ -196,6 +252,12 @@ export type MeUpdateApiArg = {
 export type MePartialUpdateApiResponse = /** status 200  */ ProfileUpdate;
 export type MePartialUpdateApiArg = {
   patchedProfileUpdate: PatchedProfileUpdate;
+};
+export type PollListApiResponse = /** status 200  */ PollListCreateRead[];
+export type PollListApiArg = void;
+export type PollCreateApiResponse = /** status 201  */ PollListCreateRead;
+export type PollCreateApiArg = {
+  pollListCreate: PollListCreate;
 };
 export type PostsListApiResponse = /** status 200  */ PaginatedPostListListRead;
 export type PostsListApiArg = {
@@ -248,8 +310,9 @@ export type SignupCreateApiResponse = /** status 201  */ Signup;
 export type SignupCreateApiArg = {
   signup: SignupWrite;
 };
-export type UsersListApiResponse = /** status 200  */ MeRead[];
-export type UsersListApiArg = void;
+export type SuggestedFriendsListApiResponse =
+  /** status 200  */ SuggestedFriendRead[];
+export type SuggestedFriendsListApiArg = void;
 export type UsersPostsListApiResponse =
   /** status 200  */ PaginatedPostListListRead;
 export type UsersPostsListApiArg = {
@@ -259,32 +322,66 @@ export type UsersPostsListApiArg = {
   pageSize?: number;
   userId: number;
 };
+export type VoteCreateApiResponse = unknown;
+export type VoteCreateApiArg = {
+  optionId: number;
+};
 export type ActivitiesGet = {
+  post?: number | null;
+  poll?: number | null;
   content: string;
 };
 export type ActivitiesGetRead = {
   id: number;
   user: string;
   userPic: string;
+  post?: number | null;
+  poll?: number | null;
   content: string;
   created_at: string;
 };
-export type ActivitiesPost = {
-  content: string;
-};
 export type CommentList = {
+  user: number;
   content: string;
 };
 export type CommentListRead = {
   id: number;
-  user: string;
-  userId: string;
-  userPic: string;
+  user: number;
   content: string;
   created_at: string;
 };
 export type CommentCreateUpdate = {
   content: string;
+};
+export type RequestsGet = {
+  sender: number;
+};
+export type RequestsGetRead = {
+  sender: number;
+  created_at: string;
+};
+export type Friend = {
+  email: string;
+  bio?: string | null;
+  profile_pic?: string | null;
+};
+export type FriendRead = {
+  id: number;
+  full_name: string;
+  email: string;
+  bio?: string | null;
+  profile_pic?: string | null;
+};
+export type FriendsChat = {
+  sender: number;
+  receiver: number;
+  message: string;
+};
+export type FriendsChatRead = {
+  sender: number;
+  receiver: number;
+  message: string;
+  timestamp: string;
 };
 export type Login = {
   email: string;
@@ -317,18 +414,38 @@ export type PatchedProfileUpdate = {
   profile_pic?: string | null;
   cover_pic?: string | null;
 };
+export type PollOption = {
+  option: string;
+};
+export type PollOptionRead = {
+  id: number;
+  option: string;
+  has_voted: boolean;
+  votes: number;
+};
+export type PollListCreate = {
+  question: string;
+  options: PollOption[];
+};
+export type PollListCreateRead = {
+  id: number;
+  user: number;
+  question: string;
+  created_at: string;
+  options: PollOptionRead[];
+};
 export type PostList = {
+  user: number;
   content: string;
   image?: string | null;
 };
 export type PostListRead = {
   id: number;
-  user: string;
-  userId: string;
-  userPic: string;
+  user: number;
   content: string;
   image?: string | null;
   no_of_likes: number;
+  no_of_comments: number;
   has_liked: boolean;
   created_at: string;
 };
@@ -359,16 +476,40 @@ export type SignupWrite = {
   email: string;
   password: string;
 };
+export type SuggestedFriend = {
+  first_name?: string;
+  last_name?: string;
+  email: string;
+  bio?: string | null;
+  profile_pic?: string | null;
+  cover_pic?: string | null;
+};
+export type SuggestedFriendRead = {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  email: string;
+  bio?: string | null;
+  profile_pic?: string | null;
+  cover_pic?: string | null;
+  status: boolean;
+};
 export const {
   useActivitiesListQuery,
-  useActivitiesCreateMutation,
   useCommentsRetrieveQuery,
   useCommentsUpdateMutation,
   useCommentsDestroyMutation,
+  useFriendSendRequestCreateMutation,
+  useFriendRequestCreateMutation,
+  useFriendRequestsListQuery,
+  useFriendsListQuery,
+  useFriendsChatListQuery,
   useLoginCreateMutation,
   useMeRetrieveQuery,
   useMeUpdateMutation,
   useMePartialUpdateMutation,
+  usePollListQuery,
+  usePollCreateMutation,
   usePostsListQuery,
   usePostsCreateMutation,
   usePostsRetrieveQuery,
@@ -379,6 +520,7 @@ export const {
   usePostsLikeCreateMutation,
   useSearchPostsListQuery,
   useSignupCreateMutation,
-  useUsersListQuery,
+  useSuggestedFriendsListQuery,
   useUsersPostsListQuery,
+  useVoteCreateMutation,
 } = injectedRtkApi;
