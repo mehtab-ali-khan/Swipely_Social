@@ -334,8 +334,8 @@ function Feed() {
                   fullWidth
                   onClick={handleClickOpenCreatePost}
                   sx={{
-                    py: 2,
-                    px: 3,
+                    py: { xs: 1, sm: 2 },
+                    px: { xs: 1, sm: 3 },
                     borderRadius: 4,
                     textTransform: "none",
                     fontSize: "1rem",
